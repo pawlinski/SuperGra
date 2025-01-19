@@ -26,15 +26,27 @@ speedY = 0
 
 # przeciwnik 1
 enemyImg = pygame.image.load("assets/ninja_64.png")
-enemyX = random.randint(0, 736) # całość ma (800) / 2 - szerokość obrazka  (64) / 2
-enemyY = random.randint(20, 250)
-enemySpeedX = 1
+enemyX = random.randint(0, 736)
+enemyY = 0 # pokaże się na górze ekranu
+enemySpeedX = random.randint(-3, 3)
+
+# strzał
+swordImg = pygame.image.load("assets/sword_32.png")
+swordX = 0
+swordY = 0
+swordSpeedY = 3
+swordState = "ready" # ready / throw
 
 def player(x, y):
     screen.blit(playerImg, (x, y)) # rysuje gracza
 
 def enemy(x, y):
     screen.blit(enemyImg, (x, y)) # rysuje przeciwnika 1
+
+def throw_sword(x, y):
+    global swordState # odwołanie do zmiennej poza funkcją
+    swordState = "throw"
+    screen.blit(swordImg, (x + 16, y + 10)) # rysuje miecz
 
 running = True
 while running:
@@ -43,19 +55,11 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: # wyjście z gry
             running = False
-        # if event.type == pygame.KEYDOWN:
-        #     if event.key == pygame.K_LEFT:
-        #         speedX = -0.3
-        #     if event.key == pygame.K_RIGHT:
-        #         speedX = 0.3
-        #     if event.key == pygame.K_UP:
-        #         speedY = -0.3
-        #     if event.key == pygame.K_DOWN:
-        #         speedY = 0.3
-        # if event.type == pygame.KEYUP:
-        #     if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHTevent.key == pygame.K_UP or event.key == pygame.K_DOWN:
-        #         speedX = 0
-        #         speedY = 0
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE: # strzał spacją
+                swordY = playerY
+                throw_sword(playerX, swordY)
+
     # poprawiony ruch klawiatury
     keys = pygame.key.get_pressed() # wykrywa wszystkie przyciski aktualnie przycisniete
 
@@ -96,7 +100,12 @@ while running:
     enemyX += enemySpeedX
 
     player(playerX, playerY)
+    # strzał
+    if swordState == "throw":
+        throw_sword(playerX,swordY)
+        swordY -= swordSpeedY
+
     enemy(enemyX, enemyY)
 
-    pygame.display.flip() # odswierza caly ekran
+    pygame.display.flip() # odswierza caly ekran (wcześnie było update)
     clock.tick(60) # poprawne odtwarzanie w 60 klatkach na sekunde
