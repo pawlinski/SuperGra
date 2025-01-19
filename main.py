@@ -28,7 +28,7 @@ speedY = 0
 enemyImg = pygame.image.load("assets/ninja_64.png")
 enemyX = random.randint(0, 736)
 enemyY = 0 # pokaże się na górze ekranu
-enemySpeedX = random.randint(-3, 3)
+enemySpeedX = random.choice([-3, -2, -1, 1, 2, 3]) # wybór prędkości i kierunku z listy (nie może być 0)
 
 # strzał
 swordImg = pygame.image.load("assets/sword_32.png")
@@ -57,8 +57,10 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE: # strzał spacją
-                swordY = playerY
-                throw_sword(playerX, swordY)
+                if swordState == "ready": # jeden strzał
+                    swordY = playerY
+                    swordX = playerX
+                    throw_sword(swordX, swordY)
 
     # poprawiony ruch klawiatury
     keys = pygame.key.get_pressed() # wykrywa wszystkie przyciski aktualnie przycisniete
@@ -100,9 +102,13 @@ while running:
     enemyX += enemySpeedX
 
     player(playerX, playerY)
+
+    if swordY <= -32: # jeżeli strzała poza planszą
+        swordState = "ready"
+
     # strzał
     if swordState == "throw":
-        throw_sword(playerX,swordY)
+        throw_sword(swordX,swordY)
         swordY -= swordSpeedY
 
     enemy(enemyX, enemyY)
