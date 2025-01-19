@@ -31,10 +31,16 @@ speedY = 0
 playerSpeedChange = 3
 
 # przeciwnik 1
-enemyImg = pygame.image.load("assets/ninja_64.png")
-enemyX = random.randint(1, 735)  # dla bezpieczeństwa zmieniamy z 0 na 1 i z 736 na 735
-enemyY = 0  # pokaże się na górze ekranu
-enemySpeedX = random.choice([-3, -2, -1, 1, 2, 3])  # wybór prędkości i kierunku z listy (nie może być 0)
+enemyImg = []
+enemyX = []
+enemyY = []
+enemySpeedX = []
+numOfEnemies = 6
+for i in range(numOfEnemies):
+    enemyImg.append(pygame.image.load("assets/ninja_64.png"))
+    enemyX.append(random.randint(1, 735))  # dla bezpieczeństwa zmieniamy z 0 na 1 i z 736 na 735
+    enemyY.append(0)  # pokaże się na górze ekranu
+    enemySpeedX.append(random.choice([-3, -2, -1, 1, 2, 3]))  # wybór prędkości i kierunku z listy (nie może być 0)
 
 # strzał
 swordImg = pygame.image.load("assets/sword_32.png")
@@ -49,8 +55,8 @@ def player(x, y):
     # global dirtyRect # odwołanie do zmiennej poza funkcją
     # dirtyRect.append(r) # dodajemy zmienną do listy odświeżania
 
-def enemy(x, y):
-    screen.blit(enemyImg, (x, y))  # rysuje przeciwnika 1
+def enemy(x, y, i):
+    screen.blit(enemyImg[i], (x, y))  # rysuje przeciwnika 1
     # r = screen.blit(enemyImg, (x, y)) # rysuje przeciwnika 1
     # global dirtyRect  # odwołanie do zmiennej poza funkcją
     # dirtyRect.append(r)  # dodajemy zmienną do listy odświeżania
@@ -69,11 +75,11 @@ def is_collision(enemyX, enemyY, swordX, swordY):
         return True
     else:
         return False
-def gen_enemy():
+def gen_enemy(i):
     global enemyX, enemyY, enemySpeedX
-    enemyX = random.randint(1, 735)
-    enemyY = 0
-    enemySpeedX = random.choice([-3, -2, -1, 1, 2, 3])
+    enemyX[i] = random.randint(1, 735)
+    enemyY[i] = 0
+    enemySpeedX[i] = random.choice([-3, -2, -1, 1, 2, 3])
 
 
 running = True
@@ -120,16 +126,23 @@ while running:
         playerY = 536
 
     # ognanicz obszar ruchu dla przeciwnika 1
-    if enemyX <= 0:
-        enemySpeedX *= -1 # jak dojdzie do krawędzi to zmieni kierunek
-        enemyY += 32 # i przesunie się w dol
-    elif enemyX >= 736: # 800 - 64
-        enemySpeedX *= -1
-        enemyY += 32
+    for i in range(numOfEnemies):
+        if enemyX[i] <= 0:
+            enemySpeedX[i] *= -1 # jak dojdzie do krawędzi to zmieni kierunek
+            enemyY[i] += 32 # i przesunie się w dol
+        elif enemyX[i] >= 736: # 800 - 64
+            enemySpeedX[i] *= -1
+            enemyY[i] += 32
+        # kolizja
+        collision = is_collision(enemyX[i], enemyY[i], swordX, swordY)
+        if collision:
+            swordState = "ready"  # resetujemy miecz
+            swordY = -50  # i usuwamy go z ekranu
+            score += 1  # dodajemy punkt
+            gen_enemy(i)
+        enemy(enemyX[i], enemyY[i], i) # generujemy przeciwnika 1
 
-    enemyX += enemySpeedX
-
-    player(playerX, playerY)
+        enemyX[i] += enemySpeedX[i]
 
     if swordY <= -32: # jeżeli strzała poza planszą
         swordState = "ready"
@@ -139,15 +152,7 @@ while running:
         throw_sword(swordX,swordY)
         swordY -= swordSpeedY
 
-    # kolizja
-    collision = is_collision(enemyX, enemyY, swordX, swordY)
-    if collision:
-        swordState = "ready" # resetujemy miecz
-        swordY = -50 # i usuwamy go z ekranu
-        score += 1 # dodajemy punkt
-        gen_enemy()
-
-    enemy(enemyX, enemyY)
+    player(playerX, playerY)
 
     pygame.display.flip() # odświeża caly ekran
     # pygame.display.update(dirtyRect) # odświeża konkretne obszary dodane do zmiennej (listy) - nie działa na openGL
