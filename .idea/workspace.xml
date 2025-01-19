@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bf79549e-9052-46c1-a2e0-2dd1fa76290e" name="Changes" comment="lekcja 18">
+    <list default="true" id="bf79549e-9052-46c1-a2e0-2dd1fa76290e" name="Changes" comment="lekcja 18 - dodanie wiekszej ilosci przeciwnikow">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -107,7 +107,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737289100005</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="lekcja 18 - dodanie wiekszej ilosci przeciwnikow">
+      <option name="closed" value="true" />
+      <created>1737291691936</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1737291691936</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -163,6 +171,7 @@
     <MESSAGE value="lekcja 15" />
     <MESSAGE value="lekcja 16" />
     <MESSAGE value="lekcja 18" />
-    <option name="LAST_COMMIT_MESSAGE" value="lekcja 18" />
+    <MESSAGE value="lekcja 18 - dodanie wiekszej ilosci przeciwnikow" />
+    <option name="LAST_COMMIT_MESSAGE" value="lekcja 18 - dodanie wiekszej ilosci przeciwnikow" />
   </component>
 </project>

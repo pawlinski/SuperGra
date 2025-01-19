@@ -7,7 +7,18 @@ from pygame.examples.go_over_there import clock
 # rozpocznij program
 pygame.init()
 
+# Wynik
 score = 0
+
+# font = pygame.font.Font("freesansbold.ttf", 32) # ładowanie czcionki wbudowanej w pygame
+font = pygame.font.Font("assets/fonts/Micro5-Regular.ttf", 32) # czcionka z fonts.google.com
+textX = 10
+textY = 10
+
+def show_score(x, y):
+    scoreText = font.render(f"Wynik: {score}", True, (0,0,0))
+    screen.blit(scoreText, (x, y))
+
 # dirtyRect = [] # "kwadraty" które mają się odświeżać
 
 clockGame = pygame.time.Clock() # zmienna zawiera zczytany czas systemowy
@@ -44,8 +55,8 @@ for i in range(numOfEnemies):
 
 # strzał
 swordImg = pygame.image.load("assets/sword_32.png")
-swordX = 0
-swordY = 0
+swordX = -50 # nie może być 0 bo czasem wykryje kolizję przed wystrzałem
+swordY = -50 # nie może być 0 bo czasem wykryje kolizję przed wystrzałem
 swordSpeedY = 5
 swordState = "ready" # ready / throw
 
@@ -70,7 +81,7 @@ def throw_sword(x, y):
     # dirtyRect.append(r)  # dodajemy zmienną do listy odświeżania
 
 def is_collision(enemyX, enemyY, swordX, swordY):
-    distance = math.sqrt(math.pow(enemyX - swordX, 2) + math.pow(enemyY - swordY, 2)) # wzór na odległość punktów
+    distance = math.sqrt((math.pow(enemyX - swordX, 2) + math.pow(enemyY - swordY, 2))) # wzór na odległość punktów
     if distance < 25:
         return True
     else:
@@ -153,6 +164,7 @@ while running:
         swordY -= swordSpeedY
 
     player(playerX, playerY)
+    show_score(textX, textY)
 
     pygame.display.flip() # odświeża caly ekran
     # pygame.display.update(dirtyRect) # odświeża konkretne obszary dodane do zmiennej (listy) - nie działa na openGL
