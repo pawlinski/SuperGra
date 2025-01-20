@@ -1,8 +1,8 @@
 import pygame
 import random
 import math
+from pygame import mixer
 
-from pygame.examples.go_over_there import clock
 
 # rozpocznij program
 pygame.init()
@@ -14,6 +14,21 @@ score = 0
 font = pygame.font.Font("assets/fonts/Micro5-Regular.ttf", 32) # czcionka z fonts.google.com
 textX = 10
 textY = 10
+
+# sword-stab-pull-melee-weapon-236207.mp3
+# Sound Effect by Cyberwave Orchestra from Pixabay
+
+# failure-1-89170.mp3
+# hurry-95692.mp3
+# Sound Effect by freesound_community from Pixabay
+
+# dźwięk tła
+mixer.music.load("sounds/hurry-95692.mp3")
+mixer.music.play(-1) # oznacza odtwarzanie w pętli
+mixer.music.set_volume(0.30) # głośność 0-1
+
+# game over dźwięk
+# over_sound = mixer.Sound("sounds/failure-1-89170.wav")
 
 def show_score(x, y):
     scoreText = font.render(f"Wynik: {score}", True, (0,0,0))
@@ -127,6 +142,8 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE: # strzał spacją
                 if swordState == "ready": # jeden strzał
+                    throw_sound = mixer.Sound("sounds/sword-stab-pull-melee-weapon-236207.wav")
+                    throw_sound.play()
                     swordY = playerY
                     swordX = playerX
                     throw_sword(swordX, swordY)
@@ -170,6 +187,7 @@ while running:
     for i in range(numOfEnemies):
         if enemyY[i] > 536: # jeżeli którykolwiek przeciwnik dotknie dołu ekranu
             game_over()
+            # over_sound.play()
             break
 
         if enemyX[i] <= 0:
@@ -182,6 +200,8 @@ while running:
         # kolizja przeciwnik - miecz
         collision = is_collision(enemyX[i], enemyY[i], swordX, swordY, 25)
         if collision:
+            death_sound = mixer.Sound("sounds/grunt2-85989.wav")
+            death_sound.play()
             swordState = "ready"  # resetujemy miecz
             swordY = -50  # i usuwamy go z ekranu
             score += 1  # dodajemy punkt
@@ -192,7 +212,7 @@ while running:
         playerColision = is_collision(enemyX[i], enemyY[i], playerX, playerY, 60)
         if playerColision:
             game_over()
-            print("kolizja z graczem")
+            # over_sound.play()
             break
 
         enemyX[i] += enemySpeedX[i]
