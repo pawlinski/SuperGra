@@ -30,11 +30,11 @@ screen = pygame.display.set_mode((800, 600)) # szerokość i wysokość okna
 pygame.display.set_caption("SuperGra")
 
 # ikona gry
-icon = pygame.image.load("assets/swords_32.png")
+icon = pygame.image.load("assets/swords_32.png").convert_alpha()
 pygame.display.set_icon(icon)
 
 # gracz
-playerImg = pygame.image.load("assets/viking_64.png")
+playerImg = pygame.image.load("assets/viking_64.png").convert_alpha()
 playerX = 368 # całość ma (800) / 2 - szerokość obrazka  (64) / 2
 playerY = 480
 speedX = 0
@@ -48,17 +48,41 @@ enemyY = []
 enemySpeedX = []
 numOfEnemies = 6
 for i in range(numOfEnemies):
-    enemyImg.append(pygame.image.load("assets/ninja_64.png"))
+    enemyImg.append(pygame.image.load("assets/ninja_64.png").convert_alpha())
     enemyX.append(random.randint(1, 735))  # dla bezpieczeństwa zmieniamy z 0 na 1 i z 736 na 735
     enemyY.append(0)  # pokaże się na górze ekranu
     enemySpeedX.append(random.choice([-3, -2, -1, 1, 2, 3]))  # wybór prędkości i kierunku z listy (nie może być 0)
 
 # strzał
-swordImg = pygame.image.load("assets/sword_32.png")
+swordImg = pygame.image.load("assets/sword_32.png").convert_alpha()
 swordX = -50 # nie może być 0 bo czasem wykryje kolizję przed wystrzałem
 swordY = -50 # nie może być 0 bo czasem wykryje kolizję przed wystrzałem
 swordSpeedY = 5
 swordState = "ready" # ready / throw
+
+# koniec gry
+gameState = "play" # satus gry potrzebny do jej wznowienia play / over
+over_font = pygame.font.Font("assets/fonts/Micro5-Regular.ttf", 70)
+def game_over():
+    global gameState, numOfEnemies, enemyY
+    gameState = "over"
+    for j in range(numOfEnemies):
+        enemyY[j] = 2000  # usuwamy resztę przeciwników
+    overText = over_font.render(f"GAME OVER! Wynik: {score}", True, (255, 0, 0))
+    # centrowanie tekstu
+    textRect = overText.get_rect()
+    textRect.center = (800 // 2, 600 // 2)
+    screen.blit(overText, textRect)
+
+# nowa gra
+def new_game():
+    global gameState, score, playerX, playerY
+    gameState = "play"
+    score = 0
+    for i in range(numOfEnemies):
+        gen_enemy(i)
+    playerX = 368
+    playerY = 480
 
 def player(x, y):
     screen.blit(playerImg, (x, y))  # rysuje gracza
@@ -68,7 +92,7 @@ def player(x, y):
 
 def enemy(x, y, i):
     screen.blit(enemyImg[i], (x, y))  # rysuje przeciwnika 1
-    # r = screen.blit(enemyImg, (x, y)) # rysuje przeciwnika 1
+    # r = screen.blit(enemyImg[i], (x, y)) # rysuje przeciwnika 1
     # global dirtyRect  # odwołanie do zmiennej poza funkcją
     # dirtyRect.append(r)  # dodajemy zmienną do listy odświeżania
 
@@ -80,13 +104,13 @@ def throw_sword(x, y):
     # global dirtyRect  # odwołanie do zmiennej poza funkcją
     # dirtyRect.append(r)  # dodajemy zmienną do listy odświeżania
 
-def is_collision(enemyX, enemyY, swordX, swordY):
+def is_collision(enemyX, enemyY, swordX, swordY, d):
     distance = math.sqrt((math.pow(enemyX - swordX, 2) + math.pow(enemyY - swordY, 2))) # wzór na odległość punktów
-    if distance < 25:
+    if distance < d:
         return True
     else:
         return False
-def gen_enemy(i):
+def gen_enemy(i): # znika i pojawia się na górze
     global enemyX, enemyY, enemySpeedX
     enemyX[i] = random.randint(1, 735)
     enemyY[i] = 0
@@ -106,6 +130,11 @@ while running:
                     swordY = playerY
                     swordX = playerX
                     throw_sword(swordX, swordY)
+            if gameState == "over":
+                if event.key == pygame.K_r: # r jak reset
+                    new_game()
+
+
 
     # poprawiony ruch klawiatury
     keys = pygame.key.get_pressed() # wykrywa wszystkie przyciski aktualnie przycisniete
@@ -113,15 +142,16 @@ while running:
     speedX = 0 # wyzerowanie prędkości przy każdym wywolaniu petli
     speedY = 0
 
-    if keys[pygame.K_LEFT]:
-        speedX = -playerSpeedChange
-    elif keys[pygame.K_RIGHT]:
-        speedX = playerSpeedChange
+    if gameState == "play":
+        if keys[pygame.K_LEFT]:
+            speedX = -playerSpeedChange
+        elif keys[pygame.K_RIGHT]:
+            speedX = playerSpeedChange
 
-    if keys[pygame.K_UP]:
-        speedY = -playerSpeedChange
-    elif keys[pygame.K_DOWN]:
-        speedY = playerSpeedChange
+        if keys[pygame.K_UP]:
+            speedY = -playerSpeedChange
+        elif keys[pygame.K_DOWN]:
+            speedY = playerSpeedChange
 
     playerX += speedX
     playerY += speedY
@@ -136,22 +166,34 @@ while running:
     elif playerY >= 536: # 600 - 64
         playerY = 536
 
-    # ognanicz obszar ruchu dla przeciwnika 1
+    # ogranicz obszar ruchu dla przeciwnika 1
     for i in range(numOfEnemies):
+        if enemyY[i] > 536: # jeżeli którykolwiek przeciwnik dotknie dołu ekranu
+            game_over()
+            break
+
         if enemyX[i] <= 0:
             enemySpeedX[i] *= -1 # jak dojdzie do krawędzi to zmieni kierunek
             enemyY[i] += 32 # i przesunie się w dol
         elif enemyX[i] >= 736: # 800 - 64
             enemySpeedX[i] *= -1
             enemyY[i] += 32
-        # kolizja
-        collision = is_collision(enemyX[i], enemyY[i], swordX, swordY)
+
+        # kolizja przeciwnik - miecz
+        collision = is_collision(enemyX[i], enemyY[i], swordX, swordY, 25)
         if collision:
             swordState = "ready"  # resetujemy miecz
             swordY = -50  # i usuwamy go z ekranu
             score += 1  # dodajemy punkt
             gen_enemy(i)
         enemy(enemyX[i], enemyY[i], i) # generujemy przeciwnika 1
+
+        # kolizja przeciwnik - gracz
+        playerColision = is_collision(enemyX[i], enemyY[i], playerX, playerY, 60)
+        if playerColision:
+            game_over()
+            print("kolizja z graczem")
+            break
 
         enemyX[i] += enemySpeedX[i]
 
