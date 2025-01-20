@@ -1,8 +1,20 @@
 import pygame
 import random
 import math
+import os, sys
 from pygame import mixer
 
+# First, install pyinstaller.
+# Open Windows Command Prompt, type:
+# pip install pyinstaller
+def resource_path(relative_path):
+    try:
+    # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # rozpocznij program
 pygame.init()
@@ -10,8 +22,9 @@ pygame.init()
 # Wynik
 score = 0
 
+font_url = resource_path("assets/fonts/Micro5-Regular.ttf")
 # font = pygame.font.Font("freesansbold.ttf", 32) # ładowanie czcionki wbudowanej w pygame
-font = pygame.font.Font("assets/fonts/Micro5-Regular.ttf", 32) # czcionka z fonts.google.com
+font = pygame.font.Font(font_url, 32) # czcionka z fonts.google.com
 textX = 10
 textY = 10
 
@@ -23,7 +36,8 @@ textY = 10
 # Sound Effect by freesound_community from Pixabay
 
 # dźwięk tła
-mixer.music.load("sounds/hurry-95692.mp3")
+music_url = resource_path("sounds/hurry-95692.mp3")
+mixer.music.load(music_url)
 mixer.music.play(-1) # oznacza odtwarzanie w pętli
 mixer.music.set_volume(0.30) # głośność 0-1
 
@@ -45,11 +59,13 @@ screen = pygame.display.set_mode((800, 600)) # szerokość i wysokość okna
 pygame.display.set_caption("SuperGra")
 
 # ikona gry
-icon = pygame.image.load("assets/swords_32.png").convert_alpha()
+icon_url =  resource_path("assets/swords_32.png")
+icon = pygame.image.load(icon_url).convert_alpha()
 pygame.display.set_icon(icon)
 
 # gracz
-playerImg = pygame.image.load("assets/viking_64.png").convert_alpha()
+player_url = resource_path("assets/viking_64.png")
+playerImg = pygame.image.load(player_url).convert_alpha()
 playerX = 368 # całość ma (800) / 2 - szerokość obrazka  (64) / 2
 playerY = 480
 speedX = 0
@@ -63,13 +79,15 @@ enemyY = []
 enemySpeedX = []
 numOfEnemies = 6
 for i in range(numOfEnemies):
-    enemyImg.append(pygame.image.load("assets/ninja_64.png").convert_alpha())
+    enemy_url = resource_path("assets/ninja_64.png")
+    enemyImg.append(pygame.image.load(enemy_url).convert_alpha())
     enemyX.append(random.randint(1, 735))  # dla bezpieczeństwa zmieniamy z 0 na 1 i z 736 na 735
     enemyY.append(0)  # pokaże się na górze ekranu
     enemySpeedX.append(random.choice([-3, -2, -1, 1, 2, 3]))  # wybór prędkości i kierunku z listy (nie może być 0)
 
 # strzał
-swordImg = pygame.image.load("assets/sword_32.png").convert_alpha()
+sword_url = resource_path("assets/sword_32.png")
+swordImg = pygame.image.load(sword_url).convert_alpha()
 swordX = -50 # nie może być 0 bo czasem wykryje kolizję przed wystrzałem
 swordY = -50 # nie może być 0 bo czasem wykryje kolizję przed wystrzałem
 swordSpeedY = 5
@@ -77,7 +95,7 @@ swordState = "ready" # ready / throw
 
 # koniec gry
 gameState = "play" # satus gry potrzebny do jej wznowienia play / over
-over_font = pygame.font.Font("assets/fonts/Micro5-Regular.ttf", 70)
+over_font = pygame.font.Font(font_url, 70)
 def game_over():
     global gameState, numOfEnemies, enemyY
     gameState = "over"
@@ -131,7 +149,8 @@ def gen_enemy(i): # znika i pojawia się na górze
     enemyY[i] = 0
     enemySpeedX[i] = random.choice([-3, -2, -1, 1, 2, 3])
 
-
+throw_sound_url = resource_path("sounds/sword-stab-pull-melee-weapon-236207.wav")
+death_sound_url = resource_path("sounds/grunt2-85989.wav")
 running = True
 while running:
     screen.fill((109,226,73)) # kolor tła
@@ -142,7 +161,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE: # strzał spacją
                 if swordState == "ready": # jeden strzał
-                    throw_sound = mixer.Sound("sounds/sword-stab-pull-melee-weapon-236207.wav")
+                    throw_sound = mixer.Sound(throw_sound_url)
                     throw_sound.play()
                     swordY = playerY
                     swordX = playerX
@@ -200,7 +219,7 @@ while running:
         # kolizja przeciwnik - miecz
         collision = is_collision(enemyX[i], enemyY[i], swordX, swordY, 25)
         if collision:
-            death_sound = mixer.Sound("sounds/grunt2-85989.wav")
+            death_sound = mixer.Sound(death_sound_url)
             death_sound.play()
             swordState = "ready"  # resetujemy miecz
             swordY = -50  # i usuwamy go z ekranu

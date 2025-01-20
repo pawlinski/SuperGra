@@ -1,0 +1,39 @@
+convert pygame to onefile exe
+
+First, install pyinstaller.
+
+Open Windows Command Prompt, type:
+pip install pyinstaller
+
+in main.py:
+
+import sys
+import os
+
+def resource_path(relative_path):
+    try:
+    # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+Change every resource path in file:
+
+asset_url = resource_path("assets/viking_64.png")
+hero_asset = pygame.image.load(asset_url)
+
+in terminal:
+pyinstaller --onefile main.py
+
+edit main.spec file
+Replace the empty datas[] list with asset directory paths like such (using tuples!):
+datas=[("assets/fonts/Micro5-Regular.ttf", "assets/fonts/"), ("sounds/hurry-95692.mp3", "sounds/"), ("assets/swords_32.png", "assets/"), ("assets/viking_64.png", "assets/"), ("assets/ninja_64.png", "assets/"), ("assets/sword_32.png", "assets/"), ("sounds/sword-stab-pull-melee-weapon-236207.wav", "sounds/"), ("sounds/grunt2-85989.wav", "sounds/")]
+
+Save and close the 'main_game_script.spec' file.
+
+in terminal:
+pyinstaller main.spec
+
+file in dist/main.exe is ready
